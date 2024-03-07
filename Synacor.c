@@ -35,8 +35,8 @@ int main(int Arguments, char* Argument[])
 	int MaxAddr=0;
 	unsigned short *Memory = (unsigned short*)malloc(32768 * sizeof(unsigned short));
 	unsigned short Register[8] = {0};
-	unsigned short *Stack = (unsigned short*)malloc(32768 * sizeof(unsigned short));
-	memset(Stack, 0, 32768 * sizeof(unsigned short));
+	unsigned short *Stack = (unsigned short*)malloc(100000 * sizeof(unsigned short));
+	memset(Stack, 0, 100000 * sizeof(unsigned short));
 	unsigned short Short;
 
 	char OutputName[100];
@@ -134,11 +134,13 @@ int main(int Arguments, char* Argument[])
 
 	void Push(unsigned short Value)
 	{
-		if (StackPtr > 32768)
+#ifdef CHECK_STACK
+		if (StackPtr >= 100000)
 		{
 			fprintf(stderr, "%s Attempt to push Value %hd beyond StackPtr %04X %s\n", cRed, Value, StackPtr, cNone);
 			exit(2);
 		}
+#endif
 		Stack[StackPtr++] = Value;
 	} /* Push(unsigned short) */
 
@@ -207,11 +209,10 @@ int main(int Arguments, char* Argument[])
 		// Debugging
 		if (Instr != 19)
 		{
-			printf(cGreen); printf("Instr %hd M[%X]:", Instr, (InstrPtr<<1)&0xFFF0);
-			for (int i=0; i<8; i++)  printf(" %hX,", Memory[(InstrPtr&0xFFF8) + i]);
-			printf("  Arg1,2: %hX,%hX", Arg1, Arg2);  printf("  Reg[%d]: %hX", RegAddr, Register[RegAddr]);
+			printf(cGreen); printf("Instr %hd M[%x]:", Instr, InstrPtr);
+			printf("  Arg1,2: %hX,%hX", Arg1, Arg2);  printf("  Reg[0]: %hX Reg[1]: %hX", Register[0], Register[1]);
 			printf("  Stack[%X]:", StackPtr);
-			for (int i=-2; i<=0; i++)  if (StackPtr+i >= 0)  printf(" %hX,", Stack[StackPtr+i]);
+			for (int i=-3; i<=0; i++)  if (StackPtr+i >= 0)  printf(" %hX,", Stack[StackPtr+i]);
 			printf("\n%s", cNone);
 		}
 #endif
